@@ -28,15 +28,18 @@ if(username===""){
 if(password===""){
     throw new ApiError(400,"password is required")
 }
-const existeduser=User.findOne({
+const existeduser=await User.findOne({
     $or:[{username},{email}]
 })
 if(existeduser){
     throw new ApiError(400,"user already exists")
 }
 const avatarlocalpath=req.files?.avatar[0]?.path;
-const coverimagelocalpath=req.files?.coverImage[0]?.path;
-
+//const coverimagelocalpath=req.files?.coverImage[0]?.path;
+let coverimagelocalpath;
+if(req.files && Array.isArray(req.files.coverImage)&& req.files.coverImage.length>0){
+    coverimagelocalpath=req.files.coverImage[0].path
+}
 if(!avatarlocalpath){
     throw new ApiError(400,"avatar is required")
 }
@@ -56,7 +59,7 @@ if(!avatarlocalpath){
 
     
  })
- const createduser=User.findbyId(user._id).select(
+ const createduser=await User.findById(user._id).select(
     "-password -refreshToken"
  )
  if(!createduser){
